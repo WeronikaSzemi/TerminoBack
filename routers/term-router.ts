@@ -16,7 +16,6 @@ termRouter
 
     .get('/:id', async (req, res) => {
         const entry = await TermRecord.getOne(req.params.id);
-
         res.json({
             entry,
         });

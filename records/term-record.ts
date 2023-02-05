@@ -14,12 +14,12 @@ export class TermRecord implements TermEntity {
     public termSource?: string;
     public termDefinition?: string;
     public termDefinitionSource?: string;
-    public termCollocations?: string[];
+    public termCollocations?: string;
     public equivalent: string;
     public equivalentSource?: string;
     public equivalentDefinition?: string;
     public equivalentDefinitionSource?: string;
-    public equivalentCollocations?: string[];
+    public equivalentCollocations?: string;
 
     constructor(obj: TermEntity) {
         const {
@@ -114,8 +114,8 @@ export class TermRecord implements TermEntity {
             throw new ValidationError('Brakuje ID terminu.');
         }
 
-        const answer = await pool.execute('UPDATE `colours` SET `term` = :term, `term_source` = :termSource,' +
-            ' `term_definition` = :termDefinition, `term_definition_source` = :termDefinitionSource, `term_collocations` = :termCollocations, `equivalent` = :equivalent, `equivalent_source` = :equivalentSource, `equivalent_definition` = :equivalentDefinition, `equivalent_definition_source` = :equivalentDefinitionSource, `equivalent_collocations` = :equivalentCollocations WHERE `id` = :id',
+        const answer = await pool.execute(
+            'UPDATE `colours` SET `term` = :term, `termSource` = :termSource, `termDefinition` = :termDefinition, `termDefinitionSource` = :termDefinitionSource, `termCollocations` = :termCollocations, `equivalent` = :equivalent, `equivalentSource` = :equivalentSource, `equivalentDefinition` = :equivalentDefinition, `equivalentDefinitionSource` = :equivalentDefinitionSource, `equivalentCollocations` = :equivalentCollocations WHERE `id` = :id',
             {
                 id: obj.id,
                 term: obj.term,
