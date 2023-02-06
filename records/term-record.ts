@@ -38,17 +38,29 @@ export class TermRecord implements TermEntity {
             equivalentCollocations
         } = obj;
 
-        if (term === '') throw new ValidationError(`Termin nie może być pustym tekstem.`);
-        if (term.length < 3) throw new ValidationError(
-            `Termin musi zawierać co najmniej trzy znaki. Aktualnie zawiera ${term.length}.`);
-        if (term.length > 50) throw new ValidationError(
-            `Termin musi zawierać maksymalnie 50 znaków. Aktualnie zawiera ${term.length}.`);
+        if (term === '') {
+            throw new ValidationError(`Termin nie może być pustym tekstem.`)
+        }
+        if (term.length < 3) {
+            throw new ValidationError(
+                `Termin musi zawierać co najmniej trzy znaki. Aktualnie zawiera ${term.length}.`)
+        }
+        if (term.length > 50) {
+            throw new ValidationError(
+                `Termin musi zawierać maksymalnie 50 znaków. Aktualnie zawiera ${term.length}.`)
+        }
 
-        if (equivalent === '') throw new ValidationError(`Ekwiwalent nie może być pustym tekstem.`);
-        if (equivalent.length < 3) throw new ValidationError(
-            `Ekwiwalent musi zawierać co najmniej trzy znaki. Aktualnie zawiera ${equivalent.length}.`);
-        if (equivalent.length > 50) throw new ValidationError(
-            `Ekwiwalent musi zawierać maksymalnie 50 znaków. Aktualnie zawiera ${equivalent.length}.`);
+        if (equivalent === '') {
+            throw new ValidationError(`Ekwiwalent nie może być pustym tekstem.`)
+        }
+        if (equivalent.length < 3) {
+            throw new ValidationError(
+                `Ekwiwalent musi zawierać co najmniej trzy znaki. Aktualnie zawiera ${equivalent.length}.`)
+        }
+        if (equivalent.length > 50) {
+            throw new ValidationError(
+                `Ekwiwalent musi zawierać maksymalnie 50 znaków. Aktualnie zawiera ${equivalent.length}.`)
+        }
 
         this.id = id ?? uuid();
         this.createdAt = createdAt ?? null;
