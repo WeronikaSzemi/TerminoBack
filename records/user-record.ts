@@ -2,15 +2,16 @@ import {v4 as uuid} from 'uuid';
 import {pool} from "../utils/db";
 import {FieldPacket} from "mysql2";
 import {ValidationError} from "../utils/error";
+import {UserEntity} from "../types";
 
 type UserRecordResults = [UserRecord[], FieldPacket[]];
 
-export class UserRecord {
+export class UserRecord implements UserEntity {
     userId?: string;
-    private readonly userName: string;
-    private hash: string;
+    readonly userName: string;
+    hash: string;
 
-    constructor(obj: UserRecord) {
+    constructor(obj: UserEntity) {
         const {userId, userName, hash} = obj;
 
         if (userName === '') {
@@ -38,30 +39,25 @@ export class UserRecord {
         });
     }
 
-    // async getOne(userName: string): Promise<void> {
-    //     const [results] = await pool.execute('SELECT * FROM `users` WHERE `userName` = :userName', {
-    //         userName,
-    //     }) as UserRecordResults;
-    //
-    //
-    // }
+    static async getOne(userName: string): Promise<UserRecord> {
+        if (!userName) {
+            throw new ValidationError('Nie podano nazwy użytkownika_czki.');
+        }
 
-    // async login(userName: string, hash: string): Promise<void> {
-    //     const [results] = await pool.execute('SELECT * FROM `users` WHERE `userName` = :userName', {
-    //         userName,
-    //     }) as UserRecordResults;
-    //
-    //     if (results.length === 0) {
-    //         throw new ValidationError('Nie zarejestrowano użytkownika_czki o takiej nazwie.');
-    //     } else {
-    //         const user = new UserRecord(results[0]);
-    //         if (user.hash !== hash) {
-    //             throw new ValidationError('Podane hasło jest nieprawidłowe.');
-    //         } else {
-    //             this.loggedIn = true;
-    //         }
-    //     }
-    // }
+        const [results] = await pool.execute('SELECT * FROM `users` WHERE `userName` = :userName', {
+            userName,
+        }) as UserRecordResults;
+
+        return results.length === 0 ? null : new UserRecord(results[0]);
+
+        // if (results.length === 0) {
+        //     throw new ValidationError('Nie ma użytkownika_czki o takiej nazwie.');
+        // } else if (results[0].hash !== hash) {
+        //     throw new ValidationError('Podane hasło jest nieprawidłowe.');
+        // } else {
+        //     return new UserRecord(results[0]);
+        // }
+    }
 
     async delete(userId: string): Promise<number> {
 
@@ -73,7 +69,7 @@ export class UserRecord {
             userId,
         });
         return (JSON.parse(JSON.stringify(answer)))[0].affectedRows;
-    }
+    };
 
     async getTermbaseList() {
 
