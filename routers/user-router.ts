@@ -27,11 +27,26 @@ userRouter
         const {password} = req.body;
 
         compare(password, userRecord.hash, (err, result) => {
-            res.json({result, userName});
+            res
+                .json({
+                    result,
+                    userName,
+                    // })
+                    //     .cookie('username', `${userName}`, {
+                    //         domain: 'localhost:3000',
+                    //         httpOnly: true,
+                    //         // secure: true, @TODO: do włączenia po przeniesieniu na serwer
+                });
         });
-        res.cookie('username', `${userName}`, {
-            domain: 'localhost:3000',
-            httpOnly: true,
-            // secure: true, @TODO: do włączenia po przeniesieniu na serwer
+    })
+
+    .get('/:userName/account', async (req, res) => {
+
+    })
+
+    .get('/:userName/termbases', async (req, res) => {
+        const termbaseList = await UserRecord.getTermbaseList(req.params.userName);
+        res.json({
+            termbaseList,
         });
     })

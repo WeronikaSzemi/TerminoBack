@@ -14,6 +14,7 @@ app.use(express.json());
 
 app.use('/terms', termRouter);
 app.use('/user', userRouter);
+// app.use('/user/:userId/termbases', termbaseRouter);
 
 app.listen(3001, 'localhost', () => {
     console.log('Listening on port on http://localhost:3001');

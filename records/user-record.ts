@@ -3,6 +3,7 @@ import {pool} from "../utils/db";
 import {FieldPacket} from "mysql2";
 import {ValidationError} from "../utils/error";
 import {UserEntity} from "../types";
+import {TermbaseRecord, TermbaseRecordResults} from "./termbase-record";
 
 type UserRecordResults = [UserRecord[], FieldPacket[]];
 
@@ -71,7 +72,15 @@ export class UserRecord implements UserEntity {
         return (JSON.parse(JSON.stringify(answer)))[0].affectedRows;
     };
 
-    async getTermbaseList() {
+    static async getTermbaseList(userName: string) {
+        if (!userName) {
+            throw new ValidationError('Brakuje ID użytkownika_czki.');
+        }
 
+        const [results] = await pool.execute('SELECT * FROM `termbases` WHERE `userName` = :userName ORDER by' +
+            ' `termbaseName` ASC', {
+            userName,
+        }) as TermbaseRecordResults;
+        return results.map(obj => new TermbaseRecord(obj));
     }
 }

@@ -4,7 +4,7 @@ import {FieldPacket} from "mysql2";
 import {ValidationError} from "../utils/error";
 import {TermbaseEntity} from "../types";
 
-type TermbaseRecordResults = [TermbaseRecord[], FieldPacket[]];
+export type TermbaseRecordResults = [TermbaseRecord[], FieldPacket[]];
 
 export class TermbaseRecord implements TermbaseEntity {
     termbaseId?: string;
@@ -49,6 +49,10 @@ export class TermbaseRecord implements TermbaseEntity {
             {
                 termbaseName: this.termbaseName,
             });
+        await pool.execute('INSERT INTO `termbases` (`termbaseName`, `userName`) VALUES (:termbaseName, :userName)', {
+            termbaseName: this.termbaseName,
+            userName: this.userName,
+        });
     }
 
 }
