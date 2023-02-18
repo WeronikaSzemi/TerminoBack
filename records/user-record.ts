@@ -77,10 +77,16 @@ export class UserRecord implements UserEntity {
             throw new ValidationError('Brakuje ID użytkownika_czki.');
         }
 
-        const [results] = await pool.execute('SELECT * FROM `termbases` WHERE `userName` = :userName ORDER by' +
-            ' `termbaseName` ASC', {
-            userName,
-        }) as TermbaseRecordResults;
+        const [answer] = await pool.execute(
+            'SELECT * FROM `termbases` WHERE `userName` = :userName ORDER by `termbaseName` ASC', {
+                userName,
+            }) as TermbaseRecordResults;
+        const results = answer.map(record => {
+            return {
+                ...record,
+                termbaseName: record.termbaseName.slice(userName.length + 1),
+            };
+        });
         return results.map(obj => new TermbaseRecord(obj));
     }
 }
