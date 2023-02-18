@@ -1,6 +1,7 @@
 import {Router} from "express";
 import {compare, hash} from "bcrypt";
 import {UserRecord} from "../records/user-record";
+import {TermbaseRecord} from "../records/termbase-record";
 
 export const userRouter = Router();
 
@@ -49,4 +50,11 @@ userRouter
         res.json({
             termbaseList,
         });
+    })
+
+    .post('/:userName/termbases', async (req, res) => {
+        const newTermbase = new TermbaseRecord(req.body);
+
+        await newTermbase.add();
+        res.json(newTermbase);
     })

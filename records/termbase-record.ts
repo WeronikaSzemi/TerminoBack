@@ -9,12 +9,10 @@ export type TermbaseRecordResults = [TermbaseRecord[], FieldPacket[]];
 export class TermbaseRecord implements TermbaseEntity {
     termbaseId?: string;
     termbaseName: string;
-    createdAt: Date;
-    lastModifiedAt: Date;
     userName: string;
 
     constructor(obj: TermbaseEntity) {
-        const {termbaseId, termbaseName, createdAt, lastModifiedAt, userName} = obj;
+        const {termbaseId, termbaseName, userName} = obj;
 
         if (termbaseName === '') {
             throw new ValidationError(`Nazwa słownika nie może być pustym tekstem.`);
@@ -30,8 +28,6 @@ export class TermbaseRecord implements TermbaseEntity {
 
         this.termbaseId = termbaseId ?? uuid();
         this.termbaseName = termbaseName;
-        this.createdAt = createdAt;
-        this.lastModifiedAt = lastModifiedAt;
         this.userName = userName;
     }
 
@@ -44,15 +40,18 @@ export class TermbaseRecord implements TermbaseEntity {
     }
 
     async add(): Promise<void> {
+
+        if (!this.termbaseId) {
+            this.termbaseId = uuid();
+        }
+
+        const sql = `CREATE TABLE ${this.userName}_${this.termbaseName} (\`id\` VARCHAR(36) NOT NULL DEFAULT uuid(), \`term\` VARCHAR(50) NOT NULL, \`termSource\` VARCHAR(100) NULL, \`termDefinition\` VARCHAR(300) NULL, \`termDefinitionSource\` VARCHAR(100) NULL, \`termCollocations\` VARCHAR(300) NULL, \`equivalent\` VARCHAR(50) NOT NULL, \`equivalentSource\` VARCHAR(100) NULL, \`equivalentDefinition\` VARCHAR(300) NULL, \`equivalentDefinitionSource\` VARCHAR(100) NULL, \`equivalentCollocations\` VARCHAR(300) NULL, PRIMARY KEY (\`id\`)) COLLATE=utf8mb4_unicode_ci;`;
+
         await pool.execute(
-            'CREATE TABLE :termbaseName (`id` VARCHAR(36) NOT NULL DEFAULT uuid(), `createdAt` DATETIME NOT NULL, `lastModifiedAt` DATETIME NOT NULL, `term` VARCHAR(50) NOT NULL, `termSource` VARCHAR(100) NULL, `termDefinition` VARCHAR(300) NULL, `termDefinitionSource` VARCHAR(100) NULL, `termCollocations` VARCHAR(300) NULL, `equivalent` VARCHAR(50) NOT NULL, `equivalentSource` VARCHAR(100) NULL, `equivalentDefinition` VARCHAR(300) NULL, `equivalentDefinitionSource` VARCHAR(100) NULL, `equivalentCollocations` VARCHAR(300) NULL, PRIMARY KEY (`id`)) COLLATE=utf8mb4_unicode_ci;',
-            {
-                termbaseName: this.termbaseName,
-            });
+            `${sql}`);
         await pool.execute('INSERT INTO `termbases` (`termbaseName`, `userName`) VALUES (:termbaseName, :userName)', {
-            termbaseName: this.termbaseName,
+            termbaseName: `${this.userName}_${this.termbaseName}`,
             userName: this.userName,
         });
     }
-
 }
