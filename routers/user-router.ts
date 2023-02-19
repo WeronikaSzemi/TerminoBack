@@ -58,3 +58,10 @@ userRouter
         await newTermbase.add();
         res.json(newTermbase);
     })
+
+    .delete('/:userName/termbases/:termbaseName', async (req, res) => {
+        const fullTermbaseName = `${req.params.userName}_${req.params.termbaseName}`;
+
+        await TermbaseRecord.drop(fullTermbaseName);
+        //     @TODO: obsługa błędu: brak słownika w bazie
+    })

@@ -54,4 +54,15 @@ export class TermbaseRecord implements TermbaseEntity {
             userName: this.userName,
         });
     }
+
+    static async drop(termbaseName: string): Promise<void> {
+        if (!termbaseName) {
+            throw new ValidationError('Nie wskazano słownika do usunięcia.');
+        }
+        const sql = `DROP TABLE ${termbaseName}`;
+        await pool.execute(`${sql}`);
+        await pool.execute('DELETE FROM `termbases` WHERE `termbaseName` = :termbaseName', {
+            termbaseName,
+        });
+    }
 }
