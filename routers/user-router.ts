@@ -21,6 +21,14 @@ userRouter
         });
     })
 
+    .get('/login/:userName', async (req, res) => {
+        const userRecord = await UserRecord.getOne(req.params.userName);
+
+        !userRecord
+            ? res.json(false)
+            : res.json(true)
+    })
+
     .post('/login/:userName', async (req, res) => {
 
         const userName = req.params.userName;
