@@ -32,10 +32,10 @@ export class TermbaseRecord implements TermbaseEntity {
     }
 
     static async getAll(userName: string): Promise<TermbaseRecord[]> {
-        const [results] = await pool.execute('SELECT * FROM `termbases` WHERE `userName` = :userName ORDER by' +
-            ' `termbaseName` ASC', {
-            userName,
-        }) as TermbaseRecordResults;
+        const [results] = await pool.execute(
+            'SELECT * FROM `termbases` WHERE `userName` = :userName ORDER by `termbaseName` ASC', {
+                userName,
+            }) as TermbaseRecordResults;
         return results.map(obj => new TermbaseRecord(obj));
     }
 
@@ -45,10 +45,9 @@ export class TermbaseRecord implements TermbaseEntity {
             this.termbaseId = uuid();
         }
 
-        const sql = `CREATE TABLE ${this.userName}_${this.termbaseName} (\`id\` VARCHAR(36) NOT NULL DEFAULT uuid(), \`term\` VARCHAR(50) NOT NULL, \`termSource\` VARCHAR(100) NULL, \`termDefinition\` VARCHAR(300) NULL, \`termDefinitionSource\` VARCHAR(100) NULL, \`termCollocations\` VARCHAR(300) NULL, \`equivalent\` VARCHAR(50) NOT NULL, \`equivalentSource\` VARCHAR(100) NULL, \`equivalentDefinition\` VARCHAR(300) NULL, \`equivalentDefinitionSource\` VARCHAR(100) NULL, \`equivalentCollocations\` VARCHAR(300) NULL, PRIMARY KEY (\`id\`)) COLLATE=utf8mb4_unicode_ci;`;
+        const sql = `CREATE TABLE \`${this.userName}_${this.termbaseName}\` (\`id\` VARCHAR(36) NOT NULL DEFAULT uuid(), \`term\` VARCHAR(50) NOT NULL, \`termSource\` VARCHAR(100) NULL, \`termDefinition\` VARCHAR(300) NULL, \`termDefinitionSource\` VARCHAR(100) NULL, \`termCollocations\` VARCHAR(300) NULL, \`equivalent\` VARCHAR(50) NOT NULL, \`equivalentSource\` VARCHAR(100) NULL, \`equivalentDefinition\` VARCHAR(300) NULL, \`equivalentDefinitionSource\` VARCHAR(100) NULL, \`equivalentCollocations\` VARCHAR(300) NULL, PRIMARY KEY (\`id\`)) COLLATE=utf8mb4_unicode_ci;`;
 
-        await pool.execute(
-            `${sql}`);
+        await pool.execute(sql);
         await pool.execute('INSERT INTO `termbases` (`termbaseName`, `userName`) VALUES (:termbaseName, :userName)', {
             termbaseName: `${this.userName}_${this.termbaseName}`,
             userName: this.userName,
