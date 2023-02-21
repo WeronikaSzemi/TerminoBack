@@ -2,6 +2,9 @@ import {Router} from "express";
 import {compare, hash} from "bcrypt";
 import {UserRecord} from "../records/user-record";
 import {TermbaseRecord} from "../records/termbase-record";
+import {TermRecord} from "../records/term-record";
+import {ValidationError} from "../utils/error";
+import {TermEntity} from "../types";
 
 export const userRouter = Router();
 
@@ -72,4 +75,50 @@ userRouter
 
         await TermbaseRecord.drop(fullTermbaseName);
         //     @TODO: obsługa błędu: brak słownika w bazie
+    })
+
+    .get('/:userName/termbases/:termbaseName', async (req, res) => {
+        const termsList = await TermRecord.getAll(req.params.userName, req.params.termbaseName);
+
+        res.json({
+            termsList,
+        });
+    })
+
+    .post('/:userName/termbases/:termbaseName', async (req, res) => {
+        const newTerm = new TermRecord(req.body);
+        await newTerm.add(req.params.userName, req.params.termbaseName);
+        res.end();
+    })
+
+    .get('/:userName/termbases/:termbaseName/:id', async (req, res) => {
+        const entry = await TermRecord.getOne(req.params.userName, req.params.termbaseName, req.params.id);
+        res.json({
+            entry,
+        });
+    })
+
+    .put('/:userName/termbases/:termbaseName/:id', async (req, res) => {
+        const term = await TermRecord.getOne(req.params.userName, req.params.termbaseName, req.params.id);
+
+        if (!term) {
+            throw new ValidationError("Nie ma takiego hasła.");
+        }
+
+        const data: TermEntity = req.body;
+        await term.edit(req.params.userName, req.params.termbaseName, data);
+
+        res.end();
+    })
+
+    .delete('/:userName/termbases/:termbaseName/:id', async (req, res) => {
+        const term = await TermRecord.getOne(req.params.userName, req.params.termbaseName, req.params.id);
+
+        if (!term) {
+            throw new ValidationError("Nie ma takiego hasła.");
+        }
+
+        await term.delete(req.params.userName, req.params.termbaseName);
+
+        res.end();
     })

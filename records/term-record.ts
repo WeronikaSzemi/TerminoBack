@@ -77,33 +77,41 @@ export class TermRecord implements TermEntity {
         this.equivalentCollocations = equivalentCollocations ?? null;
     }
 
-    static async getOne(id: string): Promise<TermRecord | null> {
+    static async getOne(userName: string, termbaseName: string, id: string): Promise<TermRecord | null> {
         if (!id) {
             throw new ValidationError('Brakuje ID terminu.');
         }
 
-        const [results] = await pool.execute('SELECT * FROM `colours` WHERE `id` = :id', {
+        const fullTermbaseName = `${userName}_${termbaseName}`;
+
+        const sql = `SELECT * FROM \`${fullTermbaseName}\` WHERE \`id\` = :id`;
+        const [results] = await pool.execute(sql, {
             id,
         }) as TermRecordResults;
 
         return results.length === 0 ? null : new TermRecord(results[0]);
     }
 
-    static async getAll(): Promise<TermRecord[]> {
-        const [results] = await pool.execute('SELECT * FROM `colours` ORDER by `term` ASC') as TermRecordResults;
+    static async getAll(userName: string, termbaseName: string): Promise<TermRecord[]> {
+        const fullTermbaseName = `${userName}_${termbaseName}`;
+
+        const sql = `SELECT * FROM \`${fullTermbaseName}\` ORDER by \`term\` ASC`;
+
+        const [results] = await pool.execute(sql) as TermRecordResults;
         return results.map(obj => new TermRecord(obj));
 
         /*@TODO: dodać parametr wskazujący na sposób sortowania: najstarsze/najnowsze albo alfabetycznie; dodać też datę w bazie*/
     }
 
-    async add(): Promise<string> {
+    async add(userName: string, termbaseName: string): Promise<void> {
 
+        const fullTermbaseName = `${userName}_${termbaseName}`;
+
+        const sql = `INSERT INTO \`${fullTermbaseName}\`(\`id\`, \`term\`, \`termSource\`, \`termDefinition\`, \`termDefinitionSource\`, \`termCollocations\`, \`equivalent\`, \`equivalentSource\`, \`equivalentDefinition\`, \`equivalentDefinitionSource\`, \`equivalentCollocations\`) VALUES(:id, :term, :termSource, :termDefinition, :termDefinitionSource, :termCollocations, :equivalent, :equivalentSource, :equivalentDefinition, :equivalentDefinitionSource, :equivalentCollocations)`
         await pool.execute(
-            'INSERT INTO `colours`(`id`, `createdAt`, `lastModifiedAt`, `term`, `termSource`, `termDefinition`, `termDefinitionSource`, `termCollocations`, `equivalent`, `equivalentSource`, `equivalentDefinition`, `equivalentDefinitionSource`, `equivalentCollocations`) VALUES(:id, :createdAt, :lastModifiedAt, :term, :termSource, :termDefinition, :termDefinitionSource, :termCollocations, :equivalent, :equivalentSource, :equivalentDefinition, :equivalentDefinitionSource, :equivalentCollocations)',
+            sql,
             {
                 id: this.id,
-                createdAt: new Date(),
-                lastModifiedAt: new Date(),
                 term: this.term,
                 termSource: this.termSource,
                 termDefinition: this.termDefinition,
@@ -116,45 +124,45 @@ export class TermRecord implements TermEntity {
                 equivalentCollocations: this.equivalentCollocations,
             });
 
-        return this.id;
     }
 
-    async edit(obj: TermEntity): Promise<number> {
+    async edit(userName: string, termbaseName: string, obj: TermEntity): Promise<void> {
         /*@TODO: dodać walidację, czy jest termin o takim ID -- w routerze*/
+
+        const fullTermbaseName = `${userName}_${termbaseName}`;
 
         if (!this.id) {
             throw new ValidationError('Brakuje ID terminu.');
         }
 
-        const answer = await pool.execute(
-            'UPDATE `colours` SET `term` = :term, `termSource` = :termSource, `termDefinition` = :termDefinition, `termDefinitionSource` = :termDefinitionSource, `termCollocations` = :termCollocations, `equivalent` = :equivalent, `equivalentSource` = :equivalentSource, `equivalentDefinition` = :equivalentDefinition, `equivalentDefinitionSource` = :equivalentDefinitionSource, `equivalentCollocations` = :equivalentCollocations WHERE `id` = :id',
-            {
-                id: obj.id,
-                term: obj.term,
-                termSource: obj.termSource,
-                termDefinition: obj.termDefinition,
-                termDefinitionSource: obj.termDefinitionSource,
-                termCollocations: obj.termCollocations,
-                equivalent: obj.equivalent,
-                equivalentSource: obj.equivalentSource,
-                equivalentDefinition: obj.equivalentDefinition,
-                equivalentDefinitionSource: obj.equivalentDefinitionSource,
-                equivalentCollocations: obj.equivalentCollocations,
-            });
-        return (JSON.parse(JSON.stringify(answer)))[0].affectedRows;
+        const sql = `UPDATE \`${fullTermbaseName}\` SET \`term\` = :term, \`termSource\` = :termSource, \`termDefinition\` = :termDefinition, \`termDefinitionSource\` = :termDefinitionSource, \`termCollocations\` = :termCollocations, \`equivalent\` = :equivalent, \`equivalentSource\` = :equivalentSource, \`equivalentDefinition\` = :equivalentDefinition, \`equivalentDefinitionSource\` = :equivalentDefinitionSource, \`equivalentCollocations\` = :equivalentCollocations WHERE \`id\` = :id`;
+        await pool.execute(sql, {
+            id: obj.id,
+            term: obj.term,
+            termSource: obj.termSource,
+            termDefinition: obj.termDefinition,
+            termDefinitionSource: obj.termDefinitionSource,
+            termCollocations: obj.termCollocations,
+            equivalent: obj.equivalent,
+            equivalentSource: obj.equivalentSource,
+            equivalentDefinition: obj.equivalentDefinition,
+            equivalentDefinitionSource: obj.equivalentDefinitionSource,
+            equivalentCollocations: obj.equivalentCollocations,
+        });
     }
 
-    async delete(): Promise<void> {
+    async delete(userName: string, termbaseName: string): Promise<void> {
         /*@TODO: dodać walidację, czy jest termin o takim ID -- w routerze*/
+
+        const fullTermbaseName = `${userName}_${termbaseName}`;
 
         if (!this.id) {
             throw new ValidationError('Brakuje ID terminu.');
         }
 
-        const answer = await pool.execute('DELETE FROM `colours` WHERE `id` = :id', {
+        const sql = `DELETE FROM \`${fullTermbaseName}\` WHERE \`id\` = :id`;
+        await pool.execute(sql, {
             id: this.id,
         });
-
-        return (JSON.parse(JSON.stringify(answer)))[0].affectedRows;
     }
 }
