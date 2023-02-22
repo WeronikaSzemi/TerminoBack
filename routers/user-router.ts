@@ -20,6 +20,7 @@ userRouter
                     hash,
                 });
                 newUser.add();
+                res.json(newUser);
             }
         });
     })
