@@ -1,4 +1,3 @@
-import {v4 as uuid} from 'uuid';
 import {pool} from "../utils/db";
 import {FieldPacket} from "mysql2";
 import {ValidationError} from "../utils/error";
@@ -8,12 +7,11 @@ import {TermbaseRecord, TermbaseRecordResults} from "./termbase-record";
 type UserRecordResults = [UserRecord[], FieldPacket[]];
 
 export class UserRecord implements UserEntity {
-    userId?: string;
     readonly userName: string;
     hash: string;
 
     constructor(obj: UserEntity) {
-        const {userId, userName, hash} = obj;
+        const {userName, hash} = obj;
 
         if (userName === '') {
             throw new ValidationError(`Nazwa użytkownika nie może być pustym tekstem.`)
@@ -27,17 +25,26 @@ export class UserRecord implements UserEntity {
                 `Nazwa użytkownika może składać się z maksymalnie 30 znaków. Aktualnie zawiera ich ${userName.length}.`);
         }
 
-        this.userId = userId ?? uuid();
         this.userName = userName;
         this.hash = hash;
     }
 
-    async add(): Promise<void> {
-        await pool.execute('INSERT into `users`(`userId`, `userName`, `hash`) VALUES(:userId, :userName, :hash)', {
-            userId: this.userId,
-            userName: this.userName,
-            hash: this.hash,
+    static async getTermbaseList(userName: string) {
+        if (!userName) {
+            throw new ValidationError('Brakuje nazwy użytkownika_czki.');
+        }
+
+        const [answer] = await pool.execute(
+            'SELECT * FROM `termbases` WHERE `userName` = :userName ORDER by `termbaseName` ASC', {
+                userName,
+            }) as TermbaseRecordResults;
+        const results = answer.map(record => {
+            return {
+                ...record,
+                termbaseName: record.termbaseName.slice(userName.length + 1),
+            };
         });
+        return results.map(obj => new TermbaseRecord(obj));
     }
 
     static async getOne(userName: string): Promise<UserRecord> {
@@ -60,33 +67,29 @@ export class UserRecord implements UserEntity {
         // }
     }
 
-    async delete(userId: string): Promise<number> {
+    async add(): Promise<void> {
+        const [results] = await pool.execute('SELECT * FROM `users` WHERE `userName` = :userName', {
+            userName: this.userName,
+        }) as UserRecordResults;
 
-        if (!this.userId) {
-            throw new ValidationError('Brakuje ID użytkownika_czki.');
+        if (results.length === 0) {
+            await pool.execute('INSERT into `users`(`userName`, `hash`) VALUES(:userName, :hash)', {
+                userName: this.userName,
+                hash: this.hash,
+            });
+        } else {
+            throw new ValidationError('Nazwa jest już zajęta. Wybierz inną.');
         }
-
-        const answer = await pool.execute('DELETE * FROM `users` WHERE `userId` = :userId', {
-            userId,
-        });
-        return (JSON.parse(JSON.stringify(answer)))[0].affectedRows;
-    };
-
-    static async getTermbaseList(userName: string) {
-        if (!userName) {
-            throw new ValidationError('Brakuje ID użytkownika_czki.');
-        }
-
-        const [answer] = await pool.execute(
-            'SELECT * FROM `termbases` WHERE `userName` = :userName ORDER by `termbaseName` ASC', {
-                userName,
-            }) as TermbaseRecordResults;
-        const results = answer.map(record => {
-            return {
-                ...record,
-                termbaseName: record.termbaseName.slice(userName.length + 1),
-            };
-        });
-        return results.map(obj => new TermbaseRecord(obj));
     }
+
+    async delete(userName: string) {
+
+        if (!this.userName) {
+            throw new ValidationError('Brakuje nazwy użytkownika_czki.');
+        }
+
+        await pool.execute('DELETE * FROM `users` WHERE `userName` = :userName', {
+            userName,
+        });
+    };
 }
