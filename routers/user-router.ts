@@ -25,6 +25,7 @@ userRouter
         });
     })
 
+
     .get('/login/:userName', async (req, res) => {
         const userRecord = await UserRecord.getOne(req.params.userName);
 
@@ -53,8 +54,12 @@ userRouter
         });
     })
 
-    .get('/:userName/account', async (req, res) => {
+    .delete('/:userName', async (req, res) => {
+        const userName = req.params.userName;
+        const userRecord = await UserRecord.getOne(userName);
 
+        await userRecord.delete();
+        res.end();
     })
 
     .get('/:userName/termbases', async (req, res) => {
@@ -73,8 +78,10 @@ userRouter
 
     .delete('/:userName/termbases/:termbaseName', async (req, res) => {
         const fullTermbaseName = `${req.params.userName}_${req.params.termbaseName}`;
+        const termbase = await TermbaseRecord.getOne(req.params.userName, fullTermbaseName);
 
-        await TermbaseRecord.drop(fullTermbaseName);
+        await termbase.drop();
+        res.end();
         //     @TODO: obsługa błędu: brak słownika w bazie
     })
 

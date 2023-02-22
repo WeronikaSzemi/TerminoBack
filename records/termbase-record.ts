@@ -31,6 +31,18 @@ export class TermbaseRecord implements TermbaseEntity {
         this.userName = userName;
     }
 
+    static async getOne(userName: string, termbaseName: string): Promise<TermbaseRecord> {
+        if (!termbaseName) {
+            throw new ValidationError('Nie podano nazwy słownika.');
+        }
+
+        const [results] = await pool.execute('SELECT * FROM `termbases` WHERE `termbaseName` = :termbaseName', {
+            termbaseName,
+        }) as TermbaseRecordResults;
+
+        return results.length === 0 ? null : new TermbaseRecord(results[0]);
+    }
+
     static async getAll(userName: string): Promise<TermbaseRecord[]> {
         const [results] = await pool.execute(
             'SELECT * FROM `termbases` WHERE `userName` = :userName ORDER by `termbaseName` ASC', {
@@ -54,14 +66,14 @@ export class TermbaseRecord implements TermbaseEntity {
         });
     }
 
-    static async drop(termbaseName: string): Promise<void> {
-        if (!termbaseName) {
+    async drop(): Promise<void> {
+        if (!this.termbaseName) {
             throw new ValidationError('Nie wskazano słownika do usunięcia.');
         }
-        const sql = `DROP TABLE ${termbaseName}`;
+        const sql = `DROP TABLE ${this.termbaseName}`;
         await pool.execute(`${sql}`);
         await pool.execute('DELETE FROM `termbases` WHERE `termbaseName` = :termbaseName', {
-            termbaseName,
+            termbaseName: this.termbaseName,
         });
     }
 }

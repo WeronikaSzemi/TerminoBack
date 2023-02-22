@@ -82,14 +82,14 @@ export class UserRecord implements UserEntity {
         }
     }
 
-    async delete(userName: string) {
+    async delete() {
 
         if (!this.userName) {
             throw new ValidationError('Brakuje nazwy użytkownika_czki.');
         }
 
-        await pool.execute('DELETE * FROM `users` WHERE `userName` = :userName', {
-            userName,
+        await pool.execute('DELETE FROM `users` WHERE `userName` = :userName', {
+            userName: this.userName,
         });
     };
 }
