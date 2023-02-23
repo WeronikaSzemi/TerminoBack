@@ -7,6 +7,7 @@
 <strong>Termino</strong> to aplikacja mojego pomysłu pozwalająca tworzyć słowniki i przechowywać w nich słownictwo. Jej część backendowa to RESTowe API napisane w Typescripcie, Node.js i Express.js z użyciem relacyjnej bazy danych. Część frontendowa, napisana również w Typescripcie i z użyciem biblioteki React.js i frameworka Bootstrap, znajduje się <a href="https://github.com/WeronikaSzemi/TerminoFront">tutaj</a>.
 
 ### Funkcjonalności:
+
 <ul>
   <li>Na <strong>stronie głównej</strong> można przeczytać o aplikacji i skorzystać z formularza kontaktowego.</li>
   <li>Nowe osoby mogą <strong>zarejestrować się</strong>, podając nazwę użytkownika_czki i hasło.</li>
@@ -17,7 +18,16 @@
   <li>Po wczytaniu <strong>pojedynczego hasła</strong> widzimy jego szczegóły, czyli wszystkie dostępne pola.</li>
 </ul>
 
+![img.png](images/img.png)
+
+![img_1.png](images/img_1.png)
+
+![img_2.png](images/img_2.png)
+
+![img_3.png](images/img_3.png)
+
 ### Zastosowane języki i narzędzia:
+
 <ul>
   <li>TypeScript</li>
   <li>JavaScript</li>
