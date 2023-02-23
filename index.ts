@@ -1,7 +1,7 @@
 import * as express from 'express';
 import * as cors from 'cors';
 import 'express-async-errors';
-import {termRouter} from "./routers/term-router";
+import {userRouter} from "./routers/user-router";
 // import './utils/db';
 
 const app = express();
@@ -11,8 +11,8 @@ app.use(cors({
 }));
 app.use(express.json());
 
-app.use('/terms', termRouter);
-
+// app.use('/terms', termRouter);
+app.use('/user', userRouter);
 
 app.listen(3001, 'localhost', () => {
     console.log('Listening on port on http://localhost:3001');
